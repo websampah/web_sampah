@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aplikasi Kebersihan & Pendataan Sampah</title>
+<style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial; background: #e8f5e9; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    h1, h2 { text-align: center; color: #2e7d32; }
+    .penting { background: #fffde7; border-left: 5px solid #fbc02d; padding: 15px; margin: 20px 0; border-radius: 8px; }
+    .penting ul { margin: 10px 0; }
+    label { display: block; margin-top: 10px; font-weight: bold; color: #333; }
+    input { width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #c8e6c9; border-radius: 8px; }
+    button { margin-top: 15px; padding: 12px 20px; background: #2e7d32; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; }
+    button:hover { background: #1b5e20; }
+    .hari { border: 2px dashed #81c784; padding: 15px; margin-top: 15px; border-radius: 10px; background: #f1f8e9; }
+    .hasil { margin-top: 25px; padding: 20px; background: #c8e6c9; border-radius: 10px; display: none; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #2e7d32; padding: 10px; text-align: center; }
+    th { background: #2e7d32; color: white; }
+    .total { font-size: 20px; font-weight: bold; color: #1b5e20; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌱 APLIKASI PENDATAAN SAMPAH</h1>
+
+    <!-- BAGIAN EDUKASI -->
+    <div class="penting">
+        <h2>Mengapa Menjaga Kebersihan Itu Penting?</h2>
+        <ul>
+            <li><b>Kesehatan:</b> Mencegah penyakit seperti DBD, diare, dan infeksi bakteri</li>
+            <li><b>Lingkungan:</b> Mengurangi pencemaran tanah, air, dan udara</li>
+            <li><b>Ekonomi:</b> Sampah plastik, kertas, logam bisa dijual dan jadi uang</li>
+            <li><b>Kenyamanan:</b> Lingkungan bersih = hidup lebih sehat dan nyaman</li>
+        </ul>
+    </div>
+
+    <label>Nama Petugas:</label>
+    <input type="text" id="namaPetugas" placeholder="Contoh: Balle">
+
+    <label>Jumlah Hari Pendataan:</label>
+    <input type="number" id="jumlahHari" min="1" value="1">
+    <button onclick="buatFormHari()">Buat Form Harian</button>
+
+    <div id="formHari"></div>
+
+    <h2>Data Sampah Yang Akan Dijual</h2>
+    <label>KG Plastik [Rp 3.000/KG]:</label>
+    <input type="number" id="kgPlastik" value="0">
+    <label>KG Kertas [Rp 1.500/KG]:</label>
+    <input type="number" id="kgKertas" value="0">
+    <label>KG Logam [Rp 8.000/KG]:</label>
+    <input type="number" id="kgLogam" value="0">
+
+    <button onclick="hitungHasil()">📊 Hitung Total & Hasil Jual</button>
+
+    <div id="hasil" class="hasil"></div>
+</div>
+
+<script>
+// Harga per KG
+const HARGA = {
+    plastik: 3000,
+    kertas: 1500,
+    logam: 8000
+};
+
+let totalMasuk = 0;
+let totalKeluar = 0;
+
+function buatFormHari() {
+    const hari = parseInt(document.getElementById("jumlahHari").value);
+    let html = "";
+    for(let i = 1; i <= hari; i++) {
+        html += `
+        <div class="hari">
+            <h3>Hari ke-${i}</h3>
+            <label>Sampah Organik [KG]:</label>
+            <input type="number" id="org${i}" value="0" min="0">
+            <label>Sampah Plastik [KG]:</label>
+            <input type="number" id="plas${i}" value="0" min="0">
+            <label>Sampah Kertas [KG]:</label>
+            <input type="number" id="kert${i}" value="0" min="0">
+            <label>Sampah Logam [KG]:</label>
+            <input type="number" id="log${i}" value="0" min="0">
+            <label>Sampah Lainnya [KG]:</label>
+            <input type="number" id="lain${i}" value="0" min="0">
+            <label>Sampah Dibuang/Keluar [KG]:</label>
+            <input type="number" id="buang${i}" value="0" min="0">
+        </div>
+        `;
+    }
+    document.getElementById("formHari").innerHTML = html;
+}
+
+function hitungHasil() {
+    const nama = document.getElementById("namaPetugas").value || "Tidak diisi";
+    const hari = parseInt(document.getElementById("jumlahHari").value);
+
+    if(hari < 1) {
+        alert("Jumlah hari minimal 1");
+        return;
+    }
+
+    totalMasuk = 0;
+    totalKeluar = 0;
+
+    // Loop hitung per hari
+    for(let i = 1; i <= hari; i++) {
+        let org = parseFloat(document.getElementById("org"+i).value) || 0;
+        let plas = parseFloat(document.getElementById("plas"+i).value) || 0;
+        let kert = parseFloat(document.getElementById("kert"+i).value) || 0;
+        let log = parseFloat(document.getElementById("log"+i).value) || 0;
+        let lain = parseFloat(document.getElementById("lain"+i).value) || 0;
+        let buang = parseFloat(document.getElementById("buang"+i).value) || 0;
+
+        totalMasuk += org + plas + kert + log + lain;
+        totalKeluar += buang;
+    }
+
+    // Hitung hasil jual
+    let kgPlastik = parseFloat(document.getElementById("kgPlastik").value) || 0;
+    let kgKertas = parseFloat(document.getElementById("kgKertas").value) || 0;
+    let kgLogam = parseFloat(document.getElementById("kgLogam").value) || 0;
+
+    let hasilPlastik = kgPlastik * HARGA.plastik;
+    let hasilKertas = kgKertas * HARGA.kertas;
+    let hasilLogam = kgLogam * HARGA.logam;
+    let totalHasil = hasilPlastik + hasilKertas + hasilLogam;
+    let sisaSampah = totalMasuk - totalKeluar;
+
+    // Tampilkan hasil
+    document.getElementById("hasil").style.display = "block";
+    document.getElementById("hasil").innerHTML = `
+        <h2>📋 LAPORAN AKHIR</h2>
+        <p><b>Petugas:</b> ${nama}</p>
+        <p><b>Lama Pendataan:</b> ${hari} Hari</p>
+        
+        <table>
+            <tr><th>Total Sampah Masuk</th><th>Total Sampah Keluar</th><th>Sisa Sampah</th></tr>
+            <tr><td>${totalMasuk.toFixed(2)} KG</td><td>${totalKeluar.toFixed(2)} KG</td><td>${sisaSampah.toFixed(2)} KG</td></tr>
+        </table>
+
+        <h3>💰 RINCIAN HASIL PENJUALAN</h3>
+        <table>
+            <tr><th>Jenis</th><th>Jumlah KG</th><th>Harga/KG</th><th>Total</th></tr>
+            <tr><td>Plastik</td><td>${kgPlastik}</td><td>Rp${HARGA.plastik.toLocaleString()}</td><td>Rp${hasilPlastik.toLocaleString()}</td></tr>
+            <tr><td>Kertas</td><td>${kgKertas}</td><td>Rp${HARGA.kertas.toLocaleString()}</td><td>Rp${hasilKertas.toLocaleString()}</td></tr>
+            <tr><td>Logam</td><td>${kgLogam}</td><td>Rp${HARGA.logam.toLocaleString()}</td><td>Rp${hasilLogam.toLocaleString()}</td></tr>
+            <tr><th colspan="3">TOTAL HASIL</th><th class="total">Rp${totalHasil.toLocaleString()}</th></tr>
+        </table>
+        
+        <p style="text-align:center; margin-top:15px;">✅ Terima kasih ${nama} sudah menjaga kebersihan!</p>
+    `;
+}
+
+// Buat 1 form default saat pertama buka
+buatFormHari();
+</script>
+
+</body>
+</html>
